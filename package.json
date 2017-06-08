@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3"
+  },
+  "devDependencies": {
+    "chai": "^4.0.1",
+    "chai-http": "^3.0.0",
+    "mocha": "^3.4.2"
+  }
+}
