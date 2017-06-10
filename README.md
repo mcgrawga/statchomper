@@ -4,7 +4,7 @@ Takes a GET request of basketball stats and returns a summary
 My daughter plays basketball.
 
 I enjoy watching the games, and I like to keep stats.
-Very simply, I keep them in the notes app on my iphone.
+I keep them in the notes app on my phone, but it is nice to be able to submit them to a service an get a summary.  Less addition for me...
 
 A typical statline might look like this:
 ar21-1bs3tffhbsfrrt3f21-1-2-333a
@@ -25,7 +25,12 @@ f = foul
 h = halftime (Required, even if there are no stats in first or second half)
 ```
 
-The above statline, produces the following JSON:
+```
+https://statchomper.herokuapp.com/basketball/ar21-1bs3tffhbsfrrt3f21-1-2-333a
+curl https://statchomper.herokuapp.com/basketball/ar21-1bs3tffhbsfrrt3f21-1-2-333a
+```
+
+The requests above, produces the following JSON:
 
 ```
 {
