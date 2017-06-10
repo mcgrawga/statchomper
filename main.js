@@ -109,11 +109,11 @@ app.get('/basketball/:statline', function (req, res) {
         res.send(JSON.stringify(bs));
     }
 });
- 
-var server = app.listen(8081, function () {
-   var host = server.address().address
-   var port = server.address().port
-   console.log("Statchomper listening at http://%s:%s", host, port)
+
+
+app.set('port', (process.env.PORT || 5000)); 
+var server = app.listen(app.get('port'), function () {
+   console.log("Statchomper listening at port ",app.get('port'));
 });
  
 module.exports = app;
