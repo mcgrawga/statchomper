@@ -1,6 +1,7 @@
 {
 	"scripts": {
-	    "start": "node main.js"
+	    "start": "node main.js",
+	    "test": "mocha"
 	},
 	"dependencies": {
 	"body-parser": "^1.17.2",

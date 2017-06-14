@@ -54,13 +54,13 @@ describe('Basketball', function() {
             res.body.firstHalf.fouls.should.be.equal(1);
             res.body.firstHalf.threePointAttempts.should.be.equal(3);
             res.body.firstHalf.threePointMade.should.be.equal(2);
-            res.body.firstHalf.threePointPercentage.should.be.equal(.67);
+            res.body.firstHalf.threePointPercentage.should.be.equal(67);
             res.body.firstHalf.twoPointAttempts.should.be.equal(3);
             res.body.firstHalf.twoPointMade.should.be.equal(2);
-            res.body.firstHalf.twoPointPercentage.should.be.equal(.67);
+            res.body.firstHalf.twoPointPercentage.should.be.equal(67);
             res.body.firstHalf.freeThrowAttempts.should.be.equal(3);
             res.body.firstHalf.freeThrowMade.should.be.equal(2);
-            res.body.firstHalf.freeThrowPercentage.should.be.equal(.67);
+            res.body.firstHalf.freeThrowPercentage.should.be.equal(67);
             res.body.firstHalf.points.should.be.equal(12);
  
             res.body.secondHalf.should.have.all.keys(keysArray);
@@ -72,13 +72,13 @@ describe('Basketball', function() {
             res.body.secondHalf.fouls.should.be.equal(1);
             res.body.secondHalf.threePointAttempts.should.be.equal(3);
             res.body.secondHalf.threePointMade.should.be.equal(2);
-            res.body.secondHalf.threePointPercentage.should.be.equal(.67);
+            res.body.secondHalf.threePointPercentage.should.be.equal(67);
             res.body.secondHalf.twoPointAttempts.should.be.equal(3);
             res.body.secondHalf.twoPointMade.should.be.equal(2);
-            res.body.secondHalf.twoPointPercentage.should.be.equal(.67);
+            res.body.secondHalf.twoPointPercentage.should.be.equal(67);
             res.body.secondHalf.freeThrowAttempts.should.be.equal(3);
             res.body.secondHalf.freeThrowMade.should.be.equal(2);
-            res.body.secondHalf.freeThrowPercentage.should.be.equal(.67);
+            res.body.secondHalf.freeThrowPercentage.should.be.equal(67);
             res.body.secondHalf.points.should.be.equal(12);
        
             res.body.game.should.have.all.keys(keysArray);
@@ -90,13 +90,13 @@ describe('Basketball', function() {
             res.body.game.fouls.should.be.equal(2);
             res.body.game.threePointAttempts.should.be.equal(6);
             res.body.game.threePointMade.should.be.equal(4);
-            res.body.game.threePointPercentage.should.be.equal(.67);
+            res.body.game.threePointPercentage.should.be.equal(67);
             res.body.game.twoPointAttempts.should.be.equal(6);
             res.body.game.twoPointMade.should.be.equal(4);
-            res.body.game.twoPointPercentage.should.be.equal(.67);
+            res.body.game.twoPointPercentage.should.be.equal(67);
             res.body.game.freeThrowAttempts.should.be.equal(6);
             res.body.game.freeThrowMade.should.be.equal(4);
-            res.body.game.freeThrowPercentage.should.be.equal(.67);
+            res.body.game.freeThrowPercentage.should.be.equal(67);
             res.body.game.points.should.be.equal(24);
             done();
         });
