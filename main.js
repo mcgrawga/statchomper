@@ -121,7 +121,16 @@ app.get('/basketball/:statline', function (req, res) {
 
 app.post('/sms-basketball', function(req, res) {
     const twiml = new MessagingResponse();
-    twiml.message('The Robots are coming! Head for the hills!');
+    console.log("Body:  " + req.body.body);
+    var responseMessage;
+    if (req.body.body.indexOf("h") == -1){
+        responseMessage = "You must have a halftime character 'h' in your statline.";
+    }else{
+        var statArray = combineStatLine(cleanStatLine(req.body.body));
+        var bs = composeBoxScore(statArray);
+        responseMessage = JSON.stringify(bs.game);
+    }
+    twiml.message(responseMessage);
     res.writeHead(200, {'Content-Type': 'text/xml'});
     res.end(twiml.toString());
 });
