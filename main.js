@@ -121,12 +121,11 @@ app.get('/basketball/:statline', function (req, res) {
 
 app.post('/sms-basketball', function(req, res) {
     const twiml = new MessagingResponse();
-    console.log("Body:  " + req.body.body);
     var responseMessage;
-    if (req.body.body.indexOf("h") == -1){
+    if (req.body.Body.indexOf("h") == -1){
         responseMessage = "You must have a halftime character 'h' in your statline.";
     }else{
-        var statArray = combineStatLine(cleanStatLine(req.body.body));
+        var statArray = combineStatLine(cleanStatLine(req.body.Body));
         var bs = composeBoxScore(statArray);
         responseMessage = JSON.stringify(bs.game);
     }
