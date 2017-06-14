@@ -3,8 +3,11 @@ var app = express();
 var fs = require('fs');
 var bs = require('./boxscore.json');
 var bodyParser = require('body-parser');
-app.use(bodyParser);
-var twilio = require('twilio');
+//app.use(bodyParser.json);
+app.use(bodyParser.urlencoded({extended: true}));
+//var twilio = require('twilio');
+
+const MessagingResponse = require('twilio').twiml.MessagingResponse;
  
 // REMOVE UNWANTED CHARACTERS
 function cleanStatLine(statLine){
@@ -114,11 +117,12 @@ app.get('/basketball/:statline', function (req, res) {
 });
 
 app.post('/sms-basketball', function (req, res) {
-    var twiml = new twilio.TwimlResponse();
+/*    var twiml = new twilio.TwimlResponse();
     twiml.message('The Robots are coming! Head for the hills!');
-    res.setHeader('Content-Type', 'text/xml');
+    //res.setHeader('Content-Type', 'text/xml');
+    res.writeHead(200, {'Content-Type': 'text/xml'});
     res.end(twiml.toString());
-    /*
+    
     if (req.params.statline.indexOf("h") == -1){
         res.status(400).send(JSON.stringify("You must have a halftime character 'h' in your statline."));
     }else{
@@ -126,7 +130,28 @@ app.post('/sms-basketball', function (req, res) {
         var bs = composeBoxScore(statArray);
         res.send(JSON.stringify(bs));
     }
-    */
+*/    
+    res.setHeader('Content-Type', 'application/json');
+    //res.send(JSON.stringify('dude'));
+    res.send(res.body.body);
+});
+
+
+
+app.post('/sms', function(req, res) {
+    const twiml = new MessagingResponse();
+
+    twiml.message('The Robots are coming! Head for the hills!');
+
+    res.writeHead(200, {'Content-Type': 'text/xml'});
+    res.end(twiml.toString());
+
+
+  // var twilio = require('twilio');
+  // var twiml = new twilio.TwimlResponse();
+  // twiml.message('The Robots are coming! Head for the hills!');
+  // res.writeHead(200, {'Content-Type': 'text/xml'});
+  // res.end(twiml.toString());
 });
 
 
