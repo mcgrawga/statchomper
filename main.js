@@ -116,42 +116,14 @@ app.get('/basketball/:statline', function (req, res) {
     }
 });
 
-app.post('/sms-basketball', function (req, res) {
-/*    var twiml = new twilio.TwimlResponse();
-    twiml.message('The Robots are coming! Head for the hills!');
-    //res.setHeader('Content-Type', 'text/xml');
-    res.writeHead(200, {'Content-Type': 'text/xml'});
-    res.end(twiml.toString());
-    
-    if (req.params.statline.indexOf("h") == -1){
-        res.status(400).send(JSON.stringify("You must have a halftime character 'h' in your statline."));
-    }else{
-        var statArray = combineStatLine(cleanStatLine(req.params.statline));
-        var bs = composeBoxScore(statArray);
-        res.send(JSON.stringify(bs));
-    }
-*/    
-    res.setHeader('Content-Type', 'application/json');
-    //res.send(JSON.stringify('dude'));
-    res.send(res.body.body);
-});
 
 
 
-app.post('/sms', function(req, res) {
+app.post('/sms-basketball', function(req, res) {
     const twiml = new MessagingResponse();
-
     twiml.message('The Robots are coming! Head for the hills!');
-
     res.writeHead(200, {'Content-Type': 'text/xml'});
     res.end(twiml.toString());
-
-
-  // var twilio = require('twilio');
-  // var twiml = new twilio.TwimlResponse();
-  // twiml.message('The Robots are coming! Head for the hills!');
-  // res.writeHead(200, {'Content-Type': 'text/xml'});
-  // res.end(twiml.toString());
 });
 
 
