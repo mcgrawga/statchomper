@@ -2,6 +2,9 @@ var express = require('express');
 var app = express();
 var fs = require('fs');
 var bs = require('./boxscore.json');
+var bodyParser = require('body-parser');
+app.use(bodyParser);
+var twilio = require('twilio');
  
 // REMOVE UNWANTED CHARACTERS
 function cleanStatLine(statLine){
@@ -108,6 +111,22 @@ app.get('/basketball/:statline', function (req, res) {
         var bs = composeBoxScore(statArray);
         res.send(JSON.stringify(bs));
     }
+});
+
+app.post('/sms-basketball', function (req, res) {
+    var twiml = new twilio.TwimlResponse();
+    twiml.message('The Robots are coming! Head for the hills!');
+    res.setHeader('Content-Type', 'text/xml');
+    res.end(twiml.toString());
+    /*
+    if (req.params.statline.indexOf("h") == -1){
+        res.status(400).send(JSON.stringify("You must have a halftime character 'h' in your statline."));
+    }else{
+        var statArray = combineStatLine(cleanStatLine(req.params.statline));
+        var bs = composeBoxScore(statArray);
+        res.send(JSON.stringify(bs));
+    }
+    */
 });
 
 
