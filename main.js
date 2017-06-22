@@ -3,9 +3,9 @@ var app = express();
 var fs = require('fs');
 var bs = require('./boxscore.json');
 var bodyParser = require('body-parser');
-//app.use(bodyParser.json);
 app.use(bodyParser.urlencoded({extended: true}));
-//var twilio = require('twilio');
+var format = require('string-format');
+format.extend(String.prototype);
 
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
  
@@ -127,7 +127,7 @@ app.post('/sms-basketball', function(req, res) {
     }else{
         var statArray = combineStatLine(cleanStatLine(req.body.Body));
         var bs = composeBoxScore(statArray);
-        responseMessage = JSON.stringify(bs.game);
+        responseMessage = 'Points: {points}, Assists: {assists}, Rebounds: {rebounds}, Turnovers: {turnovers}, Blocks: {blocks}, Steals: {steals}, Fouls: {fouls}, Threepointers: {threePointMade} for {threePointAttempts}, Three point %: {threePointPercentage}, Twopointers: {twoPointMade} for {twoPointAttempts}, Two point %: {twoPointPercentage}, Freethrows: {freeThrowMade} for {freeThrowAttempts}, Freethrow %: {freeThrowPercentage}'.format(bs.game);
     }
     twiml.message(responseMessage);
     res.writeHead(200, {'Content-Type': 'text/xml'});
