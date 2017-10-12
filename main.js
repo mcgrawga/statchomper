@@ -147,7 +147,7 @@ app.post('/sms-basketball', function(req, res) {
             db.collection('bbStats', function (err, collection) {
                 const statObject = {};
                 statObject.datePlayed = new Date();
-                statObject.statLine = req.params.statline;
+                statObject.statLine = req.body.Body;
                 statObject.boxScore = bs;
                 collection.insert(statObject);
             });
