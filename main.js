@@ -119,8 +119,7 @@ app.get('/basketball/:statline', function (req, res) {
         MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
             db.collection('bbStats', function (err, collection) {
                 const statObject = {};
-                var d = new Date();
-                statObject.datePlayed = d.getMonth() + '/' + d.getDate() + '/' + d.getFullYear();
+                statObject.datePlayed = new Date();
                 statObject.statLine = req.params.statline;
                 statObject.boxScore = bs;
                 collection.insert(statObject);
@@ -141,6 +140,18 @@ app.post('/sms-basketball', function(req, res) {
     }else{
         var statArray = combineStatLine(cleanStatLine(req.body.Body));
         var bs = composeBoxScore(statArray);
+
+        // Store statline, box score and date in db.
+        // MongoClient.connect("mongodb://localhost:27017/statchomper_bb", function (err, db) {
+        MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
+            db.collection('bbStats', function (err, collection) {
+                const statObject = {};
+                statObject.datePlayed = new Date();
+                statObject.statLine = req.params.statline;
+                statObject.boxScore = bs;
+                collection.insert(statObject);
+            });
+        });
         responseMessage = 'Points: {points}, Assists: {assists}, Rebounds: {rebounds}, Turnovers: {turnovers}, Blocks: {blocks}, Steals: {steals}, Fouls: {fouls}, Threepointers: {threePointMade} for {threePointAttempts}, Three point %: {threePointPercentage}, Twopointers: {twoPointMade} for {twoPointAttempts}, Two point %: {twoPointPercentage}, Freethrows: {freeThrowMade} for {freeThrowAttempts}, Freethrow %: {freeThrowPercentage}'.format(bs.game);
     }
     twiml.message(responseMessage);
