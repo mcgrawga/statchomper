@@ -125,7 +125,7 @@ app.get('/basketball/:statline', function (req, res) {
                 collection.insert(statObject);
             });
         });
-        res.send(JSON.stringify(statObject));
+        res.send(JSON.stringify(bs));
     }
 });
 
