@@ -27,7 +27,7 @@ var keysArray = [
     "points"
 ];
  
-describe('Basketball', function() {
+describe('/basketball/:statline', function() {
     it('Should return a 400 status code', function(done) {
         chai.request(server)
         .get('/basketball/123321')

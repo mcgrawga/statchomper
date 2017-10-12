@@ -6,6 +6,7 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 var format = require('string-format');
 format.extend(String.prototype);
+var MongoClient = require('mongodb').MongoClient;
 
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
  
@@ -112,6 +113,19 @@ app.get('/basketball/:statline', function (req, res) {
     }else{
         var statArray = combineStatLine(cleanStatLine(req.params.statline));
         var bs = composeBoxScore(statArray);
+
+        // Store statline, box score and date in db.
+        // MongoClient.connect("mongodb://localhost:27017/statchomper_bb", function (err, db) {
+        MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
+            db.collection('bbStats', function (err, collection) {
+                const statObject = {};
+                var d = new Date();
+                statObject.datePlayed = d.getMonth() + '/' + d.getDate() + '/' + d.getFullYear();
+                statObject.statLine = req.params.statline;
+                statObject.boxScore = bs;
+                collection.insert(statObject);
+            });
+        });
         res.send(JSON.stringify(bs));
     }
 });
