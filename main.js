@@ -163,7 +163,7 @@ app.post('/sms-basketball', function(req, res) {
         var statLineArray = req.body.Body.split(':');
         var player = statLineArray[0];
         var statLine = statLineArray[1];
-        var statArray = combineStatLine(cleanStatLine(statline));
+        var statArray = combineStatLine(cleanStatLine(statLine));
         var bs = composeBoxScore(statArray);
 
         // Store statline, box score and date in db.
