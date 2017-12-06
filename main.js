@@ -119,22 +119,31 @@ app.get('/basketball/:statline', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     if (req.params.statline.indexOf("h") == -1){
         res.status(400).send(JSON.stringify("You must have a halftime character 'h' in your statline."));
-    }else{
-        var statArray = combineStatLine(cleanStatLine(req.params.statline));
+    }else if (req.params.statline.indexOf(":") == -1){
+        res.status(400).send(JSON.stringify("You must put [player]: at the beginning of your statline"));
+    }else if (req.params.statline.indexOf(":") != req.params.statline.lastIndexOf(":")){
+        res.status(400).send(JSON.stringify("You can only have one instance of ':' in your statline"));
+    }
+    else{
+        var statLineArray = req.params.statline.split(':');
+        var player = statLineArray[0];
+        var statLine = statLineArray[1];
+        var statArray = combineStatLine(cleanStatLine(statLine));
         var bs = composeBoxScore(statArray);
 
-        // Store statline, box score and date in db.
+        // Store statline, box score, player and date in db.
         // MongoClient.connect("mongodb://localhost:27017/statchomper_bb", function (err, db) {
         MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
             db.collection('bbStats', function (err, collection) {
                 const statObject = {};
+                statObject.player = player;
                 statObject.datePlayed = new Date();
                 statObject.statLine = req.params.statline;
                 statObject.boxScore = bs;
                 collection.insert(statObject);
+                res.send(JSON.stringify(statObject));
             });
         });
-        res.send(JSON.stringify(bs));
     }
 });
 
@@ -146,8 +155,15 @@ app.post('/sms-basketball', function(req, res) {
     var responseMessage;
     if (req.body.Body.indexOf("h") == -1){
         responseMessage = "You must have a halftime character 'h' in your statline.";
+    }else if (req.body.Body.indexOf(":") == -1){
+        res.status(400).send(JSON.stringify("You must put [player]: at the beginning of your statline"));
+    }else if (req.body.Body.indexOf(":") != req.params.statline.lastIndexOf(":")){
+        res.status(400).send(JSON.stringify("You can only have one instance of ':' in your statline"));
     }else{
-        var statArray = combineStatLine(cleanStatLine(req.body.Body));
+        var statLineArray = req.body.Body.split(':');
+        var player = statLineArray[0];
+        var statLine = statLineArray[1];
+        var statArray = combineStatLine(cleanStatLine(statline));
         var bs = composeBoxScore(statArray);
 
         // Store statline, box score and date in db.
@@ -155,6 +171,7 @@ app.post('/sms-basketball', function(req, res) {
         MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
             db.collection('bbStats', function (err, collection) {
                 const statObject = {};
+                statObject.player = player;
                 statObject.datePlayed = new Date();
                 statObject.statLine = req.body.Body;
                 statObject.boxScore = bs;
