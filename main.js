@@ -119,15 +119,14 @@ app.get('/basketball/:statline', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     if (req.params.statline.indexOf("h") == -1){
         res.status(400).send(JSON.stringify("You must have a halftime character 'h' in your statline."));
-    }else if (req.params.statline.indexOf(":") == -1){
-        res.status(400).send(JSON.stringify("You must put [player]: at the beginning of your statline"));
-    }else if (req.params.statline.indexOf(":") != req.params.statline.lastIndexOf(":")){
-        res.status(400).send(JSON.stringify("You can only have one instance of ':' in your statline"));
+    }else if (req.params.statline.indexOf(":") == -1 || (req.params.statline.indexOf(":") == req.params.statline.lastIndexOf(":"))){
+        res.status(400).send(JSON.stringify("You must put [player]:[yyyy-mm-dd]: at the beginning of your statline"));
     }
     else{
         var statLineArray = req.params.statline.split(':');
-        var player = statLineArray[0];
-        var statLine = statLineArray[1];
+        var date = statLineArray[0];
+        var player = statLineArray[1];
+        var statLine = statLineArray[2];
         var statArray = combineStatLine(cleanStatLine(statLine));
         var bs = composeBoxScore(statArray);
 
@@ -137,7 +136,7 @@ app.get('/basketball/:statline', function (req, res) {
             db.collection('bbStats', function (err, collection) {
                 const statObject = {};
                 statObject.player = player;
-                statObject.datePlayed = new Date();
+                statObject.datePlayed = date;
                 statObject.statLine = req.params.statline;
                 statObject.boxScore = bs;
                 collection.insert(statObject);
@@ -155,14 +154,13 @@ app.post('/sms-basketball', function(req, res) {
     var responseMessage;
     if (req.body.Body.indexOf("h") == -1){
         responseMessage = "You must have a halftime character 'h' in your statline.";
-    }else if (req.body.Body.indexOf(":") == -1){
-        responseMessage = "You must put [player]: at the beginning of your statline";
-    }else if (req.body.Body.indexOf(":") != req.body.Body.lastIndexOf(":")){
-        responseMessage = "You can only have one instance of ':' in your statline";
+    }else if (req.body.Body.indexOf(":") == -1 || (req.body.Body.indexOf(":") == req.body.Body.lastIndexOf(":"))){
+        responseMessage = "You must put [player]:[yyyy-mm-dd]: at the beginning of your statline";
     }else{
         var statLineArray = req.body.Body.split(':');
-        var player = statLineArray[0];
-        var statLine = statLineArray[1];
+        var date = statLineArray[0];
+        var player = statLineArray[1];
+        var statLine = statLineArray[2];
         var statArray = combineStatLine(cleanStatLine(statLine));
         var bs = composeBoxScore(statArray);
 
@@ -172,7 +170,7 @@ app.post('/sms-basketball', function(req, res) {
             db.collection('bbStats', function (err, collection) {
                 const statObject = {};
                 statObject.player = player;
-                statObject.datePlayed = new Date();
+                statObject.datePlayed = date;
                 statObject.statLine = req.body.Body;
                 statObject.boxScore = bs;
                 collection.insert(statObject);
