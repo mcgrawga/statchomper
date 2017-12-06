@@ -120,7 +120,7 @@ app.get('/basketball/:statline', function (req, res) {
     if (req.params.statline.indexOf("h") == -1){
         res.status(400).send(JSON.stringify("You must have a halftime character 'h' in your statline."));
     }else if (req.params.statline.indexOf(":") == -1 || (req.params.statline.indexOf(":") == req.params.statline.lastIndexOf(":"))){
-        res.status(400).send(JSON.stringify("You must put [player]:[yyyy-mm-dd]: at the beginning of your statline"));
+        res.status(400).send(JSON.stringify("You must put [yyyy-mm-dd]:[player]: at the beginning of your statline"));
     }
     else{
         var statLineArray = req.params.statline.split(':');
@@ -155,7 +155,7 @@ app.post('/sms-basketball', function(req, res) {
     if (req.body.Body.indexOf("h") == -1){
         responseMessage = "You must have a halftime character 'h' in your statline.";
     }else if (req.body.Body.indexOf(":") == -1 || (req.body.Body.indexOf(":") == req.body.Body.lastIndexOf(":"))){
-        responseMessage = "You must put [player]:[yyyy-mm-dd]: at the beginning of your statline";
+        responseMessage = "You must put [yyyy-mm-dd]:[player]: at the beginning of your statline";
     }else{
         var statLineArray = req.body.Body.split(':');
         var date = statLineArray[0];
