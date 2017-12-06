@@ -156,9 +156,9 @@ app.post('/sms-basketball', function(req, res) {
     if (req.body.Body.indexOf("h") == -1){
         responseMessage = "You must have a halftime character 'h' in your statline.";
     }else if (req.body.Body.indexOf(":") == -1){
-        res.status(400).send(JSON.stringify("You must put [player]: at the beginning of your statline"));
+        responseMessage = "You must put [player]: at the beginning of your statline";
     }else if (req.body.Body.indexOf(":") != req.params.statline.lastIndexOf(":")){
-        res.status(400).send(JSON.stringify("You can only have one instance of ':' in your statline"));
+        responseMessage = "You can only have one instance of ':' in your statline";
     }else{
         var statLineArray = req.body.Body.split(':');
         var player = statLineArray[0];
