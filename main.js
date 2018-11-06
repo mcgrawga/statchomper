@@ -9,12 +9,14 @@ format.extend(String.prototype);
 var MongoClient = require('mongodb').MongoClient;
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 
+
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
- 
+
+
 // REMOVE UNWANTED CHARACTERS
 function cleanStatLine(statLine){
     var validChars = "artbsf-123h";
@@ -25,7 +27,8 @@ function cleanStatLine(statLine){
     }
     return cleanStatLine;
 }
- 
+
+
 // COMBINE ARRAY CELLS THAT CONTAIN "-" WITH THE CELL TO THE RIGHT.
 // FOR EXAMPLE [-][3] BECOMES [-3]
 function combineStatLine(statArray){
@@ -40,7 +43,8 @@ function combineStatLine(statArray){
     }
     return tmpArray;
 }
- 
+
+
 function fillInStats(statArray){
     var boxScore = JSON.parse(fs.readFileSync('./boxscore.json'));
     for(var i = 0; i < statArray.length; i++){
@@ -104,7 +108,8 @@ function fillInStats(statArray){
     }
     return boxScore;
 }
- 
+
+
 function composeBoxScore(statArray){
     var firstHalfArray = [], secondHalfArray = [], gameArray = [];
     var halfTimeIndex = statArray.indexOf("h");
@@ -119,37 +124,7 @@ function composeBoxScore(statArray){
     boxScore.game = fillInStats(gameArray);
     return boxScore;
 }
- 
-app.get('/basketball/:statline', function (req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    if (req.params.statline.indexOf("h") == -1){
-        res.status(400).send(JSON.stringify("You must have a halftime character 'h' in your statline."));
-    }else if (req.params.statline.indexOf(":") == -1 || (req.params.statline.indexOf(":") == req.params.statline.lastIndexOf(":"))){
-        res.status(400).send(JSON.stringify("You must put [yyyy-mm-dd]:[player]: at the beginning of your statline"));
-    }
-    else{
-        var statLineArray = req.params.statline.split(':');
-        var date = statLineArray[0];
-        var player = statLineArray[1];
-        var statLine = statLineArray[2];
-        var statArray = combineStatLine(cleanStatLine(statLine));
-        var bs = composeBoxScore(statArray);
 
-        // Store statline, box score, player and date in db.
-        // MongoClient.connect("mongodb://localhost:27017/statchomper_bb", function (err, db) {
-        MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
-            db.collection('bbStats', function (err, collection) {
-                const statObject = {};
-                statObject.player = player;
-                statObject.datePlayed = date;
-                statObject.statLine = req.params.statline;
-                statObject.boxScore = bs;
-                collection.insert(statObject);
-                res.send(JSON.stringify(statObject));
-            });
-        });
-    }
-});
 
 app.get('/basketball-statlines', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
@@ -163,8 +138,6 @@ app.get('/basketball-statlines', function (req, res) {
         });
     });
 });
-
-
 
 
 app.post('/sms-basketball', function(req, res) {
