@@ -145,13 +145,14 @@ app.post('/sms-basketball', function(req, res) {
     var responseMessage;
     if (req.body.Body.indexOf("h") == -1){
         responseMessage = "You must have a halftime character 'h' in your statline.";
-    }else if (req.body.Body.indexOf(":") == -1 || (req.body.Body.indexOf(":") == req.body.Body.lastIndexOf(":"))){
-        responseMessage = "You must put [yyyy-mm-dd]:[player]: at the beginning of your statline";
+    }else if ((req.body.Body.match(/:/g) || []).length != 3){
+        responseMessage = "You must put [yyyy-mm-dd]:[player]:[opponent]: at the beginning of your statline";
     }else{
         var statLineArray = req.body.Body.split(':');
-        var date = statLineArray[0];
-        var player = statLineArray[1];
-        var statLine = statLineArray[2];
+        var date = statLineArray[0].trim();
+        var player = statLineArray[1].trim();
+        var opponent = statLineArray[2].trim();
+        var statLine = statLineArray[3].trim();
         var statArray = combineStatLine(cleanStatLine(statLine));
         var bs = composeBoxScore(statArray);
 
@@ -162,13 +163,14 @@ app.post('/sms-basketball', function(req, res) {
                 const statObject = {};
                 statObject.player = player;
                 statObject.datePlayed = date;
+                statObject.opponent = opponent;
                 statObject.statLine = req.body.Body;
                 statObject.boxScore = bs;
                 collection.insert(statObject);
             });
         });
         responseMessage = 'Points: {points}, Assists: {assists}, Rebounds: {rebounds}, Turnovers: {turnovers}, Blocks: {blocks}, Steals: {steals}, Fouls: {fouls}, Threepointers: {threePointMade} for {threePointAttempts}, Three point %: {threePointPercentage}, Twopointers: {twoPointMade} for {twoPointAttempts}, Two point %: {twoPointPercentage}, Freethrows: {freeThrowMade} for {freeThrowAttempts}, Freethrow %: {freeThrowPercentage}'.format(bs.game);
-        responseMessage = `${player}'s stats for ${date}:  ${responseMessage}`;
+        responseMessage = `${player}'s stats on ${date} vs. ${opponent}:  ${responseMessage}`;
     }
     twiml.message(responseMessage);
     res.writeHead(200, {'Content-Type': 'text/xml'});
