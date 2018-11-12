@@ -143,11 +143,11 @@ app.get('/basketball-statlines', function (req, res) {
 app.post('/sms-basketball', function(req, res) {
     const twiml = new MessagingResponse();
     var responseMessage;
-    if (req.body.Body.indexOf("h") == -1){
-        responseMessage = "You must have a halftime character 'h' in your statline.";
-    }else if ((req.body.Body.match(/:/g) || []).length != 3){
-        responseMessage = "You must put [yyyy-mm-dd]:[player]:[opponent]: at the beginning of your statline";
-    }else{
+    try {
+        if ((req.body.Body.match(/\d{4}-\d{2}-\d{2}\s*:\s*\w+[\s\w]*:\s*\w+[\s\w]*:\s*[321ratsbf-]*h[321ratsbf-]*/) || []).length != 1){
+            throw "Incorrect format.  You must send <yyyy-mm-dd>:<player>:<opponent>:<first half stats>h<second half stats>";
+        }
+
         var statLineArray = req.body.Body.split(':');
         var date = statLineArray[0].trim();
         var player = statLineArray[1].trim();
@@ -171,6 +171,9 @@ app.post('/sms-basketball', function(req, res) {
         });
         responseMessage = 'Points: {points}, Assists: {assists}, Rebounds: {rebounds}, Turnovers: {turnovers}, Blocks: {blocks}, Steals: {steals}, Fouls: {fouls}, Threepointers: {threePointMade} for {threePointAttempts}, Three point %: {threePointPercentage}, Twopointers: {twoPointMade} for {twoPointAttempts}, Two point %: {twoPointPercentage}, Freethrows: {freeThrowMade} for {freeThrowAttempts}, Freethrow %: {freeThrowPercentage}'.format(bs.game);
         responseMessage = `${player}'s stats on ${date} vs. ${opponent}:  ${responseMessage}`;
+
+    } catch(err){
+        responseMessage = err;
     }
     twiml.message(responseMessage);
     res.writeHead(200, {'Content-Type': 'text/xml'});
