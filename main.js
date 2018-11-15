@@ -94,9 +94,9 @@ function fillInStats(statArray){
     boxScore.points = boxScore.threePointMade * 3;
     boxScore.points += boxScore.twoPointMade * 2;
     boxScore.points += boxScore.freeThrowMade;
-    boxScore.threePointPercentage = parseFloat((boxScore.threePointMade / boxScore.threePointAttempts).toFixed(2))*100;
-    boxScore.twoPointPercentage = parseFloat((boxScore.twoPointMade / boxScore.twoPointAttempts).toFixed(2))*100;
-    boxScore.freeThrowPercentage = parseFloat((boxScore.freeThrowMade / boxScore.freeThrowAttempts).toFixed(2))*100;
+    boxScore.threePointPercentage = Math.round((boxScore.threePointMade / boxScore.threePointAttempts)*100);
+    boxScore.twoPointPercentage = Math.round((boxScore.twoPointMade / boxScore.twoPointAttempts)*100);
+    boxScore.freeThrowPercentage = Math.round((boxScore.freeThrowMade / boxScore.freeThrowAttempts)*100);
     if (isNaN(boxScore.threePointPercentage)){
         boxScore.threePointPercentage = 'n/a';
     }
