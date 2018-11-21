@@ -130,7 +130,7 @@ app.get('/basketball-statlines', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
         db.collection('bbStats', function (err, collection) {
-            collection.find({}).toArray(function(err, result) {
+            collection.find({}).sort({_id:-1}).toArray(function(err, result) {
                 if (err) throw err;
                 res.json(result);
                 db.close();
