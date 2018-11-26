@@ -130,7 +130,30 @@ app.get('/basketball-statlines', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
         db.collection('bbStats', function (err, collection) {
-            collection.find({}, {sort: [['datePlayed', 'desc']]}).toArray(function(err, result) {
+            if (req.query.sort === undefined) {
+                collection.find({}, {sort: [['datePlayed', 'desc']]}).toArray(function(err, result) {
+                    if (err) throw err;
+                    res.json(result);
+                    db.close();
+                });
+            } else if (req.query.sort === 'player'){
+                collection.find({}, {sort: [['player', 'asc']]}).toArray(function(err, result) {
+                    if (err) throw err;
+                    res.json(result);
+                    db.close();
+                });
+            } else {
+                res.status(422).json({ error: 'Unrecognized sort parameter' });
+            }
+        });
+    });
+});
+
+app.get('/basketball-statlines/:player', function (req, res) {
+    res.setHeader('Content-Type', 'application/json');
+    MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
+        db.collection('bbStats', function (err, collection) {
+            collection.find({player: req.params.player}, {sort: [['datePlayed', 'desc']]}).toArray(function(err, result) {
                 if (err) throw err;
                 res.json(result);
                 db.close();
