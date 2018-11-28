@@ -207,6 +207,7 @@ app.post('/sms-basketball', function(req, res) {
         });
         responseMessage = 'Points: {points}, Assists: {assists}, Rebounds: {rebounds}, Turnovers: {turnovers}, Blocks: {blocks}, Steals: {steals}, Fouls: {fouls}, Threepointers: {threePointMade} for {threePointAttempts}, Three point %: {threePointPercentage}, Twopointers: {twoPointMade} for {twoPointAttempts}, Two point %: {twoPointPercentage}, Freethrows: {freeThrowMade} for {freeThrowAttempts}, Freethrow %: {freeThrowPercentage}'.format(bs.game);
         responseMessage = `${player}'s stats on ${date} vs. ${opponent}:  ${responseMessage}`;
+        responseMessage = `${responseMessage}  Check out all your game stats at https://statchomper-ui.herokuapp.com`;
 
     } catch(err){
         responseMessage = err;
