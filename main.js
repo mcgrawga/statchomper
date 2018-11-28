@@ -137,7 +137,7 @@ app.get('/basketball-statlines', function (req, res) {
                     db.close();
                 });
             } else if (req.query.sort === 'player'){
-                collection.find({}, {sort: [['player', 'asc']]}).toArray(function(err, result) {
+                collection.find({}, {sort: [['player', 'asc'], ['datePlayed', 'desc']]}).toArray(function(err, result) {
                     if (err) throw err;
                     res.json(result);
                     db.close();
