@@ -205,7 +205,22 @@ app.post('/sms-basketball', function(req, res) {
                 collection.insert(statObject);
             });
         });
-        responseMessage = 'Points: {points}, Assists: {assists}, Rebounds: {rebounds}, Turnovers: {turnovers}, Blocks: {blocks}, Steals: {steals}, Fouls: {fouls}, Threepointers: {threePointMade} for {threePointAttempts}, Three point %: {threePointPercentage}, Twopointers: {twoPointMade} for {twoPointAttempts}, Two point %: {twoPointPercentage}, Freethrows: {freeThrowMade} for {freeThrowAttempts}, Freethrow %: {freeThrowPercentage}'.format(bs.game);
+        let twoPointPercentage = bs.game.twoPointPercentage;
+        if (twoPointPercentage !== 'n/a'){
+            twoPointPercentage = `${twoPointPercentage}%`;
+        }
+        let threePointPercentage = bs.game.threePointPercentage;
+        if (threePointPercentage !== 'n/a'){
+            threePointPercentage = `${threePointPercentage}%`;
+        }
+        let freeThrowPercentage = bs.game.freeThrowPercentage;
+        if (freeThrowPercentage !== 'n/a'){
+            freeThrowPercentage = `${freeThrowPercentage}%`;
+        }
+        responseMessage = `Points: {points}, Assists: {assists}, Rebounds: {rebounds}, Turnovers: {turnovers}, Blocks: {blocks}, Steals: {steals}, Fouls: {fouls}, 
+            Threepointers: {threePointMade} for {threePointAttempts} (${threePointPercentage}), 
+            Twopointers: {twoPointMade} for {twoPointAttempts} (${twoPointPercentage}), 
+            Freethrows: {freeThrowMade} for {freeThrowAttempts} (${freeThrowPercentage})`.format(bs.game);
         responseMessage = `${player}'s stats on ${date} vs. ${opponent}:  ${responseMessage}`;
         responseMessage = `${responseMessage}  https://statchomper-ui.herokuapp.com`;
 
