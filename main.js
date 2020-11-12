@@ -128,19 +128,20 @@ function composeBoxScore(statArray){
 
 app.get('/basketball-statlines', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
-    MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
+    MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+        var db = client.db('stats');
         db.collection('bbStats', function (err, collection) {
             if (req.query.sort === undefined) {
                 collection.find({}, {sort: [['datePlayed', 'desc']]}).toArray(function(err, result) {
                     if (err) throw err;
                     res.json(result);
-                    db.close();
+                    client.close();
                 });
             } else if (req.query.sort === 'player'){
                 collection.find({}, {sort: [['player', 'asc'], ['datePlayed', 'desc']]}).toArray(function(err, result) {
                     if (err) throw err;
                     res.json(result);
-                    db.close();
+                    client.close();
                 });
             } else {
                 res.status(422).json({ error: 'Unrecognized sort parameter' });
@@ -151,12 +152,13 @@ app.get('/basketball-statlines', function (req, res) {
 
 app.get('/basketball-statlines/:player', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
-    MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
+    MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+        var db = client.db('stats');
         db.collection('bbStats', function (err, collection) {
             collection.find({player: req.params.player}, {sort: [['datePlayed', 'desc']]}).toArray(function(err, result) {
                 if (err) throw err;
                 res.json(result);
-                db.close();
+                client.close();
             });
         });
     });
@@ -164,12 +166,13 @@ app.get('/basketball-statlines/:player', function (req, res) {
 
 app.get('/basketball-players', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
-    MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
+    MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+        var db = client.db('stats');
         db.collection('bbStats', function (err, collection) {
             collection.distinct('player', {}, function(err, result) {
                 if (err) throw err;
                 res.json(result.sort());
-                db.close();
+                client.close();
             });
         });
     });
@@ -194,7 +197,8 @@ app.post('/sms-basketball', function(req, res) {
 
         // Store statline, box score and date in db.
         // MongoClient.connect("mongodb://localhost:27017/statchomper_bb", function (err, db) {
-        MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
+        MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+            var db = client.db('stats');
             db.collection('bbStats', function (err, collection) {
                 const statObject = {};
                 statObject.player = player;
