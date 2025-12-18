@@ -129,6 +129,10 @@ function composeBoxScore(statArray){
 app.get('/basketball-statlines', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+        if (err) {
+            console.error('MongoDB connection error:', err);
+            return res.status(500).json({ error: 'Database connection failed', details: err.message });
+        }
         var db = client.db('stats');
         db.collection('bbStats', function (err, collection) {
             if (req.query.sort === undefined) {
@@ -153,6 +157,10 @@ app.get('/basketball-statlines', function (req, res) {
 app.get('/basketball-statlines/:player', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+        if (err) {
+            console.error('MongoDB connection error:', err);
+            return res.status(500).json({ error: 'Database connection failed', details: err.message });
+        }
         var db = client.db('stats');
         db.collection('bbStats', function (err, collection) {
             collection.find({player: req.params.player}, {sort: [['datePlayed', 'desc']]}).toArray(function(err, result) {
@@ -167,6 +175,10 @@ app.get('/basketball-statlines/:player', function (req, res) {
 app.get('/basketball-players', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+        if (err) {
+            console.error('MongoDB connection error:', err);
+            return res.status(500).json({ error: 'Database connection failed', details: err.message });
+        }
         var db = client.db('stats');
         db.collection('bbStats', function (err, collection) {
             collection.distinct('player', {}, function(err, result) {
@@ -197,7 +209,12 @@ app.post('/sms-basketball', function(req, res) {
 
         // Store statline, box score and date in db.
         // MongoClient.connect("mongodb://localhost:27017/statchomper_bb", function (err, db) {
+        
         MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+            if (err) {
+                console.error('MongoDB connection error:', err);
+                return res.status(500).send('Database connection failed: ' + err.message);
+            }
             var db = client.db('stats');
             db.collection('bbStats', function (err, collection) {
                 const statObject = {};
@@ -237,7 +254,7 @@ app.post('/sms-basketball', function(req, res) {
 });
 
 
-app.set('port', (process.env.PORT || 5000)); 
+app.set('port', (process.env.PORT || 3000)); 
 var server = app.listen(app.get('port'), function () {
    console.log("Statchomper listening at port ",app.get('port'));
 });
