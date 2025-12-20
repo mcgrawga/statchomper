@@ -19,7 +19,7 @@ app.use(function(req, res, next) {
 
 // REMOVE UNWANTED CHARACTERS
 function cleanStatLine(statLine){
-    var validChars = "artbsf-123h";
+    var validChars = "artbsf-123";
     var cleanStatLine = [];
     for(var i = 0; i < statLine.length; i++){
         if (validChars.indexOf(statLine[i]) != -1)
@@ -45,7 +45,7 @@ function combineStatLine(statArray){
 }
 
 
-function fillInStats(statArray){
+function composeBoxScore(statArray){
     var boxScore = JSON.parse(fs.readFileSync('./boxscore.json'));
     for(var i = 0; i < statArray.length; i++){
         var char = statArray[i];
@@ -106,22 +106,6 @@ function fillInStats(statArray){
     if (isNaN(boxScore.freeThrowPercentage)){
         boxScore.freeThrowPercentage = 'n/a';
     }
-    return boxScore;
-}
-
-
-function composeBoxScore(statArray){
-    var firstHalfArray = [], secondHalfArray = [], gameArray = [];
-    var halfTimeIndex = statArray.indexOf("h");
-    if (halfTimeIndex != -1){
-        firstHalfArray = statArray.slice(0, halfTimeIndex);
-        secondHalfArray = statArray.slice(halfTimeIndex + 1);
-        gameArray = firstHalfArray.concat(secondHalfArray);
-    }
-    var boxScore = {};
-    boxScore.firstHalf = fillInStats(firstHalfArray);
-    boxScore.secondHalf = fillInStats(secondHalfArray);
-    boxScore.game = fillInStats(gameArray);
     return boxScore;
 }
 
@@ -195,8 +179,8 @@ app.post('/sms-basketball', function(req, res) {
     const twiml = new MessagingResponse();
     var responseMessage;
     try {
-        if ((req.body.Body.match(/\d{4}-\d{2}-\d{2}\s*:\s*\w+[\s\w]*:\s*\w+[\s\w]*:\s*[321ratsbf-]*h[321ratsbf-]*/) || []).length != 1){
-            throw "Incorrect format.  You must send <yyyy-mm-dd>:<player>:<opponent>:<first half stats>h<second half stats>";
+        if ((req.body.Body.match(/\d{4}-\d{2}-\d{2}\s*:\s*\w+[\s\w]*:\s*\w+[\s\w]*:\s*[321ratsbf-]*$/) || []).length != 1){
+            throw "Incorrect format.  You must send <yyyy-mm-dd>:<player>:<opponent>:<game stats>";
         }
 
         var statLineArray = req.body.Body.split(':');
