@@ -112,7 +112,7 @@ function composeBoxScore(statArray){
 
 app.get('/basketball-statlines', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
-    MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+    MongoClient.connect(process.env.MONGODB_URI, { useUnifiedTopology: true }, function (err, client) {
         if (err) {
             console.error('MongoDB connection error:', err);
             return res.status(500).json({ error: 'Database connection failed', details: err.message });
@@ -140,7 +140,7 @@ app.get('/basketball-statlines', function (req, res) {
 
 app.get('/basketball-statlines/:player', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
-    MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+    MongoClient.connect(process.env.MONGODB_URI, { useUnifiedTopology: true }, function (err, client) {
         if (err) {
             console.error('MongoDB connection error:', err);
             return res.status(500).json({ error: 'Database connection failed', details: err.message });
@@ -158,7 +158,7 @@ app.get('/basketball-statlines/:player', function (req, res) {
 
 app.get('/basketball-players', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
-    MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+    MongoClient.connect(process.env.MONGODB_URI, { useUnifiedTopology: true }, function (err, client) {
         if (err) {
             console.error('MongoDB connection error:', err);
             return res.status(500).json({ error: 'Database connection failed', details: err.message });
@@ -194,7 +194,7 @@ app.post('/sms-basketball', function(req, res) {
         // Store statline, box score and date in db.
         // MongoClient.connect("mongodb://localhost:27017/statchomper_bb", function (err, db) {
         
-        MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+        MongoClient.connect(process.env.MONGODB_URI, { useUnifiedTopology: true }, function (err, client) {
             if (err) {
                 console.error('MongoDB connection error:', err);
                 return res.status(500).send('Database connection failed: ' + err.message);
@@ -210,22 +210,22 @@ app.post('/sms-basketball', function(req, res) {
                 collection.insert(statObject);
             });
         });
-        let twoPointPercentage = bs.game.twoPointPercentage;
+        let twoPointPercentage = bs.twoPointPercentage;
         if (twoPointPercentage !== 'n/a'){
             twoPointPercentage = `${twoPointPercentage}%`;
         }
-        let threePointPercentage = bs.game.threePointPercentage;
+        let threePointPercentage = bs.threePointPercentage;
         if (threePointPercentage !== 'n/a'){
             threePointPercentage = `${threePointPercentage}%`;
         }
-        let freeThrowPercentage = bs.game.freeThrowPercentage;
+        let freeThrowPercentage = bs.freeThrowPercentage;
         if (freeThrowPercentage !== 'n/a'){
             freeThrowPercentage = `${freeThrowPercentage}%`;
         }
         responseMessage = `Points: {points}, Assists: {assists}, Rebounds: {rebounds}, Turnovers: {turnovers}, Blocks: {blocks}, Steals: {steals}, Fouls: {fouls}, 
             Threepointers: {threePointMade} for {threePointAttempts} (${threePointPercentage}), 
             Twopointers: {twoPointMade} for {twoPointAttempts} (${twoPointPercentage}), 
-            Freethrows: {freeThrowMade} for {freeThrowAttempts} (${freeThrowPercentage})`.format(bs.game);
+            Freethrows: {freeThrowMade} for {freeThrowAttempts} (${freeThrowPercentage})`.format(bs);
         responseMessage = `${player}'s stats on ${date} vs. ${opponent}:  ${responseMessage}`;
         responseMessage = `${responseMessage}  https://statchomper-ui.herokuapp.com`;
 
@@ -235,6 +235,147 @@ app.post('/sms-basketball', function(req, res) {
     twiml.message(responseMessage);
     res.writeHead(200, {'Content-Type': 'text/xml'});
     res.end(twiml.toString());
+});
+
+
+app.put('/sms-basketball/:id', function(req, res) {
+    const twiml = new MessagingResponse();
+    var responseMessage;
+    try {
+        // Validate MongoDB ObjectId format
+        const ObjectId = require('mongodb').ObjectId;
+        if (!req.params.id || !req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+            throw "Invalid ID format. ID must be a 24-character hex string.";
+        }
+        
+        if ((req.body.Body.match(/\d{4}-\d{2}-\d{2}\s*:\s*\w+[\s\w]*:\s*\w+[\s\w]*:\s*[321ratsbf-]*$/) || []).length != 1){
+            throw "Incorrect format.  You must send <yyyy-mm-dd>:<player>:<opponent>:<game stats>";
+        }
+
+        var statLineArray = req.body.Body.split(':');
+        var date = statLineArray[0].trim();
+        var player = statLineArray[1].trim();
+        var opponent = statLineArray[2].trim();
+        var statLine = statLineArray[3].trim();
+        var statArray = combineStatLine(cleanStatLine(statLine));
+        var bs = composeBoxScore(statArray);
+
+        // Update existing document in dbd
+        MongoClient.connect(process.env.MONGODB_URI, { useUnifiedTopology: true }, function (err, client) {
+            if (err) {
+                console.error('MongoDB connection error:', err);
+                return res.status(500).send('Database connection failed: ' + err.message);
+            }
+            var db = client.db('stats');
+            db.collection('bbStats', function (err, collection) {
+                try {
+                    const statObject = {};
+                    statObject.player = player;
+                    statObject.datePlayed = date;
+                    statObject.opponent = opponent;
+                    statObject.statLine = req.body.Body;
+                    statObject.boxScore = bs;
+                    
+                    // Use replaceOne to replace the entire document
+                    collection.replaceOne(
+                        { _id: new ObjectId(req.params.id) },
+                        statObject,
+                        function(err, result) {
+                            if (err) {
+                                console.error('Update error:', err);
+                                client.close();
+                                return;
+                            }
+                            if (result.matchedCount === 0) {
+                                console.log('No document found with id:', req.params.id);
+                            } else {
+                                console.log('Document updated successfully');
+                            }
+                            client.close();
+                        }
+                    );
+                } catch (dbErr) {
+                    console.error('Database operation error:', dbErr);
+                    client.close();
+                    return res.status(400).send('Database operation failed: ' + dbErr.message);
+                }
+            });
+        });
+        let twoPointPercentage = bs.twoPointPercentage;
+        if (twoPointPercentage !== 'n/a'){
+            twoPointPercentage = `${twoPointPercentage}%`;
+        }
+        let threePointPercentage = bs.threePointPercentage;
+        if (threePointPercentage !== 'n/a'){
+            threePointPercentage = `${threePointPercentage}%`;
+        }
+        let freeThrowPercentage = bs.freeThrowPercentage;
+        if (freeThrowPercentage !== 'n/a'){
+            freeThrowPercentage = `${freeThrowPercentage}%`;
+        }
+        responseMessage = `Points: {points}, Assists: {assists}, Rebounds: {rebounds}, Turnovers: {turnovers}, Blocks: {blocks}, Steals: {steals}, Fouls: {fouls}, 
+            Threepointers: {threePointMade} for {threePointAttempts} (${threePointPercentage}), 
+            Twopointers: {twoPointMade} for {twoPointAttempts} (${twoPointPercentage}), 
+            Freethrows: {freeThrowMade} for {freeThrowAttempts} (${freeThrowPercentage})`.format(bs);
+        responseMessage = `${player}'s stats on ${date} vs. ${opponent}:  ${responseMessage}`;
+        responseMessage = `${responseMessage}  https://statchomper-ui.herokuapp.com`;
+
+    } catch(err){
+        responseMessage = err;
+    }
+    twiml.message(responseMessage);
+    res.writeHead(200, {'Content-Type': 'text/xml'});
+    res.end(twiml.toString());
+});
+
+
+app.delete('/sms-basketball/:id', function(req, res) {
+    try {
+        // Validate MongoDB ObjectId format
+        const ObjectId = require('mongodb').ObjectId;
+        if (!req.params.id || !req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({ error: 'Invalid ID format. ID must be a 24-character hex string.' });
+        }
+
+        // Delete document from db
+        MongoClient.connect(process.env.MONGODB_URI, { useUnifiedTopology: true }, function (err, client) {
+            if (err) {
+                console.error('MongoDB connection error:', err);
+                return res.status(500).json({ error: 'Database connection failed', details: err.message });
+            }
+            var db = client.db('stats');
+            db.collection('bbStats', function (err, collection) {
+                try {
+                    collection.deleteOne(
+                        { _id: new ObjectId(req.params.id) },
+                        function(err, result) {
+                            if (err) {
+                                console.error('Delete error:', err);
+                                client.close();
+                                return res.status(500).json({ error: 'Delete operation failed', details: err.message });
+                            }
+                            if (result.deletedCount === 0) {
+                                console.log('No document found with id:', req.params.id);
+                                client.close();
+                                return res.status(404).json({ error: 'Document not found' });
+                            } else {
+                                console.log('Document deleted successfully');
+                                client.close();
+                                return res.status(200).json({ message: 'Document deleted successfully' });
+                            }
+                        }
+                    );
+                } catch (dbErr) {
+                    console.error('Database operation error:', dbErr);
+                    client.close();
+                    return res.status(400).json({ error: 'Database operation failed', details: dbErr.message });
+                }
+            });
+        });
+    } catch(err) {
+        console.error('Error:', err);
+        return res.status(500).json({ error: 'Server error', details: err.message });
+    }
 });
 
 

@@ -8,7 +8,10 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/main.js"
+            "program": "${workspaceFolder}/main.js",
+            "env": {
+                "MONGODB_URI": "mongodb+srv://gmoney:Red1ranger%2A@cluster0.m5riyzg.mongodb.net/"
+            }
         }
     ]
 }
