@@ -7,6 +7,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 var format = require('string-format');
 format.extend(String.prototype);
 var MongoClient = require('mongodb').MongoClient;
+var ObjectId = require('mongodb').ObjectId;
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 
 
@@ -149,6 +150,38 @@ app.get('/basketball-statlines/:player', function (req, res) {
         db.collection('bbStats', function (err, collection) {
             collection.find({player: req.params.player}, {sort: [['datePlayed', 'desc']]}).toArray(function(err, result) {
                 if (err) throw err;
+                res.json(result);
+                client.close();
+            });
+        });
+    });
+});
+
+app.get('/basketball-statline/:id', function (req, res) {
+    res.setHeader('Content-Type', 'application/json');
+    
+    // Validate ObjectId format
+    if (!req.params.id || !req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({ error: 'Invalid game ID format' });
+    }
+    
+    MongoClient.connect(process.env.MONGODB_URI, { useUnifiedTopology: true }, function (err, client) {
+        if (err) {
+            console.error('MongoDB connection error:', err);
+            return res.status(500).json({ error: 'Database connection failed', details: err.message });
+        }
+        var db = client.db('stats');
+        db.collection('bbStats', function (err, collection) {
+            collection.findOne({_id: ObjectId(req.params.id)}, function(err, result) {
+                if (err) {
+                    client.close();
+                    console.error('Error finding game:', err);
+                    return res.status(500).json({ error: 'Error finding game', details: err.message });
+                }
+                if (!result) {
+                    client.close();
+                    return res.status(404).json({ error: 'Game not found' });
+                }
                 res.json(result);
                 client.close();
             });
