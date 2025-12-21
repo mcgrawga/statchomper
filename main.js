@@ -14,6 +14,10 @@ const MessagingResponse = require('twilio').twiml.MessagingResponse;
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
     next();
 });
 
@@ -356,9 +360,16 @@ app.put('/sms-basketball/:id', function(req, res) {
     } catch(err){
         responseMessage = err;
     }
-    twiml.message(responseMessage);
-    res.writeHead(200, {'Content-Type': 'text/xml'});
-    res.end(twiml.toString());
+    
+    // Return JSON for web API calls, XML for SMS
+    const acceptHeader = req.get('Accept') || '';
+    if (acceptHeader.includes('application/json')) {
+        res.status(200).json({ success: true, message: responseMessage });
+    } else {
+        twiml.message(responseMessage);
+        res.writeHead(200, {'Content-Type': 'text/xml'});
+        res.end(twiml.toString());
+    }
 });
 
 
